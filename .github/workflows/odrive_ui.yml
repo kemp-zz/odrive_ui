@@ -40,13 +40,3 @@ jobs:
           port: ${{ secrets.PORT }}
           script: |
             /home/odrive-ui/odrive_ui.exe
-      - name: Create Release Tag
-        run: |
-          echo "v1.0.0-$(date +%Y%m%d%H%M%S)" > version.txt
-        shell: bash
-      - name: Release
-        uses: softprops/action-gh-release@v1
-        with:
-          tag_name: "$(cat version.txt)"
-          draft: false
-          prerelease: false
