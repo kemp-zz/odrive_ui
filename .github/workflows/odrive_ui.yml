@@ -3,6 +3,9 @@ name: Odrive UI Deployment
 on:
   push:
     branches: [ master ]
+    tags: 
+      - '*'
+
 
 jobs:
   build-and-deploy:
@@ -37,8 +40,8 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          tag_name: ${{ github.ref_name }} # 只获取分支名或标签名，而不是完整的 ref 路径
-          release_name: Release ${{ github.ref_name }}
+          tag_name: ${{ github.ref }}
+          release_name: Release ${{ github.ref }}
           draft: false
           prerelease: false
 
