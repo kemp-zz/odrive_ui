@@ -1,57 +1,43 @@
-name: odrive_ui
-on: 
+name: Odrive UI
+
+on:
   push:
     branches: [ main ]
 
 jobs:
-  build_windows:
+  build-and-deploy:
     runs-on: windows-latest
-    
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v2
+      - uses: actions/checkout@v3
+      - name: Set up Python
+        uses: actions/setup-python@v3
+      - name: Install dependencies
+        run: |
+          pip install -e .  # development mode
+          pip install odrive
+          pip install pyqtgraph
+          pip install pyqt5
+          pip install pyqt6
+      - name: Create PyInstaller spec file
+        run: echo "# odrive_ui" > odrive_ui.spec
+      - name: Build application
+        run: pyinstaller --onefile --windowed odrive_ui.py
+      - name: Deploy application
+        uses: appleboy/ssh-action@master
         with:
-            fetch-depth: 0
-
-      - name: Setup Python
-        uses: actions/setup-python@v2
+          host: ${{ secrets.HOST }}
+          username: ${{ secrets.USERNAME }}
+          key: ${{ secrets.KEY }}
+          port: ${{ secrets.PORT }}
+    
+          script: |
+            rsync -avz --exclude=__pycache__ ./dist/odrive_ui.exe odrive-ui@${{ secrets.HOST }}:/home/odrive-ui
+      - name: Run application
+        uses: appleboy/ssh-action@master
         with:
-          python-version: '3.9'
-          architecture: 'x64'
-
-      - name: Install Dependencies
-        run: |
-          python -m pip install --upgrade pip
-          pip install -r requirements.txt
-          pip install pyinstaller
-
-      - name: Install PyBind11
-        run: |
-          python -m pip install pybind11
-
-      - name: Create Executable with PyInstaller
-        run: pyinstaller odrive_ui.spec
-
-      - name: Rename file with details
-        run: |
-          Move-Item -Path .\dist\odrive_ui.exe -Destination .\dist\simpleFOCStudio-windows-x86_64-${{ github.sha }}.exe
-        shell: pwsh
-
-      - name: Create Release Tag
-        run: |
-          git config user.name "github-actions"
-          git config user.email "github-actions@github.com"
-          $date = Get-Date -Format "yyyyMMddHHmmss"
-          $TAG_NAME="v${{ github.ref_name }}-$date"
-          echo "TAG_NAME=$TAG_NAME" | Out-File -FilePath $env:GITHUB_ENV -Append
-          git tag $TAG_NAME
-          git push origin $TAG_NAME
-        shell: pwsh
-
-      - name: Release
-        uses: softprops/action-gh-release@v1
-        with:
-          files: ./dist/*.exe
-          tag_name: ${{ env.TAG_NAME }}
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          host: ${{ secrets.HOST }}
+          username: ${{ secrets.USERNAME }}
+          key: ${{ secrets.KEY }}
+          port: ${{ secrets.PORT }}
+          script: |
+            /home/odrive-ui/odrive_ui.exe
