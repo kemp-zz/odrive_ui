@@ -30,13 +30,32 @@ jobs:
         run: pyinstaller --onefile --windowed odrivetool_UI.py
         shell: pwsh
 
+      # 创建 GitHub Release
+      - name: Create Release
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ github.ref }}
+          release_name: Release ${{ github.ref }}
+          draft: false
+          prerelease: false
+
+      # 上传构建的文件到 GitHub Release
+      - name: Upload Release Asset
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./dist/odrivetool_UI.exe
+          asset_name: odrivetool_UI.exe
+          asset_content_type: application/octet-stream
+
       # 将应用程序部署到远程服务器
       - name: Deploy application
-        uses: shivammathur/run-ssh@master
+        uses: appleboy/ssh-action@master
         with:
           host: ${{ secrets.HOST }}
-          user: ${{ secrets.USERNAME }}
-          key: ${{ secrets.KEY }}
-          port: ${{ secrets.PORT }}
-          command: |
-            rsync -avz --exclude=__pycache__ ./dist/odrivetool_UI.exe odrive-ui@${{ secrets.HOST }}:/home/odrive-ui
+          username: ${{ secrets.USERNAME }}
