@@ -13,20 +13,24 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v3
         with:
-          python-version: '3.9'  # 选择与您项目兼容的Python版本
+          python-version: '3.9'
 
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install -e .  # development mode
-          pip install odrive pyqtgraph pyqt5 pyqt6 pyinstaller  # 合并安装命令并确保包括pyinstaller
+          pip install -e .
+          pip install odrive pyqtgraph pyqt5 pyqt6 pyinstaller
 
-      - name: Create PyInstaller spec file
-        run: echo "# odrive_ui" > odrive_ui.spec
+      - name: Create PyInstaller spec file for odrivetool_UI
+        run: echo "# odrivetool_UI" > odrivetool_UI.spec
 
+      - name: Build odrivetool_UI application
+        run: pyinstaller --onefile --windowed odrivetool_UI.py
+
+  
       - name: Build application
         run: |
-          pyinstaller --onefile --windowed odrive_ui.py
+          pyinstaller --onefile --windowed odrivetool_UI.py
         shell: pwsh  # 指定 PowerShell 作为脚本的运行环境
 
       - name: Deploy application
@@ -37,7 +41,7 @@ jobs:
           key: ${{ secrets.KEY }}
           port: ${{ secrets.PORT }}
           script: |
-            rsync -avz --exclude=__pycache__ ./dist/odrive_ui.exe odrive-ui@${{ secrets.HOST }}:/home/odrive-ui
+            rsync -avz --exclude=__pycache__ ./dist/odrivetool_UI.exe odrive-ui@${{ secrets.HOST }}:/home/odrive-ui
 
       - name: Run application
         uses: appleboy/ssh-action@master
@@ -47,4 +51,4 @@ jobs:
           key: ${{ secrets.KEY }}
           port: ${{ secrets.PORT }}
           script: |
-            /home/odrive-ui/odrive_ui.exe
+            /home/odrive-ui/odrivetool_UI.exe
