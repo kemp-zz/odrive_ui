@@ -29,7 +29,6 @@ jobs:
           username: ${{ secrets.USERNAME }}
           key: ${{ secrets.KEY }}
           port: ${{ secrets.PORT }}
-    
           script: |
             rsync -avz --exclude=__pycache__ ./dist/odrive_ui.exe odrive-ui@${{ secrets.HOST }}:/home/odrive-ui
       - name: Run application
@@ -41,3 +40,13 @@ jobs:
           port: ${{ secrets.PORT }}
           script: |
             /home/odrive-ui/odrive_ui.exe
+      - name: Create Release Tag
+        run: |
+          echo "v1.0.0-$(date +%Y%m%d%H%M%S)" > version.txt
+        shell: bash
+      - name: Release
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: "$(cat version.txt)"
+          draft: false
+          prerelease: false
