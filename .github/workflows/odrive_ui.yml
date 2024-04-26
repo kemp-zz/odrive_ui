@@ -16,7 +16,7 @@ jobs:
 
       - uses: actions/checkout@v3
         with:
-          fetch-depth: 0  
+          fetch-depth: 0  # To ensure we get the full commit history including tags
 
       - name: Set up Python
         uses: actions/setup-python@v3
@@ -38,9 +38,10 @@ jobs:
       - name: Extract tag name from ref
         id: get_tag_name
         run: |
-          for tag in $(git tag --points-at HEAD); do
-              if [[ " $tags " =~ " ${tag} " ]]; then
-                  echo "::set-environment name=TAG_NAME::${tag}"
+          $tags = git tag --points-at HEAD
+          for tag in $tags; do
+              if "$tags" -like "*$tag*"; then
+                  Write-Host "::set-environment name=TAG_NAME::$tag"
                   break
               fi
           done
