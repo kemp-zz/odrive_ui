@@ -3,25 +3,29 @@ name: Odrive UI Deployment
 on:
   push:
     branches: [ master ]
-    tags:
+    tags: 
       - 'v1.0.0'
+
 
 jobs:
   build-and-deploy:
     runs-on: windows-latest
     steps:
+
       - uses: actions/checkout@v3
+
 
       - name: Set up Python
         uses: actions/setup-python@v3
         with:
           python-version: '3.9'
 
+
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
           pip install -e .
-          pip install odrive pyqtgraph pyqt5 pyinstaller
+          pip install odrive pyqtgraph pyqt5 pyqt6 pyinstaller
         shell: pwsh
       
   
@@ -29,29 +33,33 @@ jobs:
         run: pyinstaller --onefile --windowed odrivetool_UI.py
         shell: pwsh
 
+
       - name: Create Release
         id: create_release
         uses: actions/create-release@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          tag_name: ${{ github.ref.replace('refs/tags/', '') }}
+          tag_name: ${{ github.ref }}
           release_name: Release ${{ github.ref }}
           draft: false
           prerelease: false
 
-    - name: Upload Release Asset
-      uses: actions/upload-release-asset@v1
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: ./dist/odrivetool_UI.exe
-        asset_name: odrivetool_UI.exe
-        asset_content_type: application/octet-stream
 
-    - name: Deploy application
-      uses: appleboy/ssh-action@master
-      with:
-        host: ${{ secrets.HOST }}
-        username: ${{ secrets.USERNAME }}
+   
+      - name: Upload Release Asset
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./dist/odrivetool_UI.exe
+          asset_name: odrivetool_UI.exe
+          asset_content_type: application/octet-stream
+
+
+      - name: Deploy application
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.HOST }}
+          username: ${{ secrets.USERNAME }}    帮我修改
