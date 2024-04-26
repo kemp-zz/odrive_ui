@@ -7,7 +7,7 @@ on:
       - 'v*'
 
 env:
-  PYTHON_VERSION: '3.9' # 环境变量可以在这里统一定义
+  PYTHON_VERSION: '3.9'
 
 jobs:
   build-and-deploy:
@@ -31,14 +31,13 @@ jobs:
       - name: Create PyInstaller spec file
         run: |
           pyi-makespec --onefile --windowed --hidden-import fibre odrivetool_UI.py
-          # Optional: Add additional commands to modify the spec file if necessary.
+        
         shell: pwsh
 
       - name: Build odrivetool_UI application using spec file
         run: |
           pyinstaller odrivetool_UI.spec
-          # If the .spec file needs to be generated with specific options, include them here.
-          
+                    
       - name: Extract tag name
         id: get_tag_name
         run: echo "TAG_NAME=${GITHUB_REF##*/}" >> $GITHUB_ENV
