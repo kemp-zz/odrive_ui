@@ -2,11 +2,19 @@
 
 block_cipher = None
 
+
+additional_imports = [
+    'fibre',  
+    'PyQt5',  
+    'pyqtgraph',  
+    'odrive'  
+]
+
 a = Analysis(['odrivetool_UI.py'],
-             pathex=['<where-your-python-path>'],  # add your Python file path here
+             pathex=['<where-your-python-path>'],  
              binaries=[],
              datas=[],
-             hiddenimports=['fibre'],  # Add 'fibre' here
+             hiddenimports=additional_imports, 
              hookspath=[],
              runtime_hooks=[],
              excludes=[],
@@ -31,4 +39,4 @@ exe = EXE(pyz,
           upx=True,
           upx_exclude=[],
           runtime_tmpdir=None,
-          console=False )
+          console=False ) 
