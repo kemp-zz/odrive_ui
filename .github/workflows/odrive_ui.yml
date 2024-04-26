@@ -1,5 +1,8 @@
 name: Odrive UI Deployment
 
+env:
+  TAG_NAME: ''
+
 on:
   push:
     branches: [ master ]
@@ -12,13 +15,13 @@ jobs:
     steps:
 
       - uses: actions/checkout@v3
-
+        with:
+          fetch-depth: 0  # To ensure we get the full commit history including tags
 
       - name: Set up Python
         uses: actions/setup-python@v3
         with:
           python-version: '3.9'
-
 
       - name: Install dependencies
         run: |
@@ -32,21 +35,24 @@ jobs:
         run: pyinstaller --onefile --windowed odrivetool_UI.py
         shell: pwsh
 
-
       - name: Extract tag name from ref
         id: get_tag_name
-        run: echo "::set-output name=TAG_NAME::${GITHUB_REF#'refs/tags/'}"
-
+        run: |
+          for tag in $(git tag --points-at HEAD); do
+              if [[ " $tags " =~ " ${tag} " ]]; then
+                  echo "::set-environment name=TAG_NAME::${tag}"
+                  break
+              fi
+          done
 
       - name: Create Release
         
         uses: actions/create-release@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          PYTHON: ${{ steps.set_up_python.outputs.python-path }}
         with:
-          tag_name: ${{ steps.get_tag_name.outputs.TAG_NAME }}
-          release_name: Release ${{ steps.get_tag_name.outputs.TAG_NAME }}
+          tag_name: ${{ env.TAG_NAME }}
+          release_name: Release ${{ env.TAG_NAME }}
           body: |
            Update notes for this release.
           draft: false
@@ -55,7 +61,7 @@ jobs:
 
    
       - name: Upload Release Asset
-        uses: actions/upload-release-asset@v1
+        uses: actions/upload-release-asset@v2
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
