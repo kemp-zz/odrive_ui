@@ -3,37 +3,31 @@ name: Odrive UI Deployment
 on:
   push:
     branches: [ master ]
-    tags: 
+    tags:
       - 'v1.0.0'
-
 
 jobs:
   build-and-deploy:
     runs-on: windows-latest
     steps:
-      # 检出代码
       - uses: actions/checkout@v3
 
-      # 设置 Python 环境
       - name: Set up Python
         uses: actions/setup-python@v3
         with:
           python-version: '3.9'
 
-      # 安装 Python 依赖
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
           pip install -e .
-          pip install odrive pyqtgraph pyqt5 pyqt6 pyinstaller
+          pip install odrive pyqtgraph pyqt5 pyinstaller
         shell: pwsh
-      
-      # 使用 PyInstaller 构建 odrivetool_UI 应用
+
       - name: Build odrivetool_UI application
         run: pyinstaller --onefile --windowed odrivetool_UI.py
         shell: pwsh
 
-      # 创建 GitHub Release
       - name: Create Release
         id: create_release
         uses: actions/create-release@v1
@@ -45,8 +39,6 @@ jobs:
           draft: false
           prerelease: false
 
-
-      # 上传构建的文件到 GitHub Release
       - name: Upload Release Asset
         uses: actions/upload-release-asset@v1
         env:
@@ -57,9 +49,13 @@ jobs:
           asset_name: odrivetool_UI.exe
           asset_content_type: application/octet-stream
 
-      # 将应用程序部署到远程服务器
       - name: Deploy application
         uses: appleboy/ssh-action@master
         with:
           host: ${{ secrets.HOST }}
           username: ${{ secrets.USERNAME }}
+          port: ${{ secrets.PORT }} # 如果你有自定义端口，请在这里指定
+          script: |
+            cd /path/to/deploy # 切换到要部署的目录
+            unzip -o /path/to/dist/odrivetool_UI.exe # 解压缩可执行文件
+            rm /path/to/dist/odrivetool_UI.exe # 从GitHub Actions运行器上删除已提取的文件
