@@ -43,6 +43,7 @@ jobs:
         uses: actions/create-release@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PYTHON: ${{ steps.set_up_python.outputs.python-path }}
         with:
           tag_name: ${{ steps.get_tag_name.outputs.TAG_NAME }}
           release_name: Release ${{ steps.get_tag_name.outputs.TAG_NAME }}
