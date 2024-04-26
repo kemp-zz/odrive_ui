@@ -5,7 +5,6 @@ on:
     branches: [ master ]
     tags:
       - 'v*'
-
 env:
   PYTHON_VERSION: '3.9'
 
@@ -30,24 +29,20 @@ jobs:
           
       - name: Create PyInstaller spec file
         run: |
-          pyi-makespec --onefile --windowed --hidden-import fibre odrivetool_UI.py
-        
+          pyi-makespec --onefile --windowed --hidden-import fibre odrivetool_UI.py        
         shell: pwsh
 
       - name: Manually adjust PyInstaller spec file
-        run: |
-                  
+        run: |                  
         shell: pwsh
 
       - name: Build odrivetool_UI application using spec file
         run: |
-          pyinstaller --noconfirm --clean odrivetool_UI.spec
-                    
+          pyinstaller --noconfirm --clean odrivetool_UI.spec                    
       - name: Extract tag name
         id: get_tag_name
         run: echo "TAG_NAME=${GITHUB_REF##*/}" >> $GITHUB_ENV
-        shell: bash
-        
+        shell: bash        
       - name: Create Release
         id: create_release
         uses: actions/create-release@v1
@@ -58,8 +53,7 @@ jobs:
           release_name: Release ${{ env.TAG_NAME }}
           body: Update notes for this release.
           draft: false
-          prerelease: false
-          
+          prerelease: false          
       - name: Upload Release Asset
         uses: actions/upload-release-asset@v1
         env:
