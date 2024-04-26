@@ -39,12 +39,13 @@ jobs:
         id: get_tag_name
         run: |
           $tags = git tag --points-at HEAD
-          for tag in $tags; do
-              if "$tags" -like "*$tag*"; then
-                  Write-Host "::set-environment name=TAG_NAME::$tag"
+          foreach ($tag in $tags) {
+              if ($tags -like "*$tag*") {
+                  echo "TAG_NAME=$tag" | Out-File -Append -FilePath $env:GITHUB_ENV
                   break
-              fi
-          done
+              }
+            }
+
 
       - name: Create Release
         
