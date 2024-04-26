@@ -40,8 +40,8 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          tag_name: ${{ github.ref }}
-          release_name: Release ${{ github.ref }}
+          tag_name: ${{ github.ref | split('refs/tags/') | last }}
+          release_name: Release ${{ github.ref | split('refs/tags/') | last }}
           body: |
            Update notes for this release.
           draft: false
