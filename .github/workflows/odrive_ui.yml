@@ -28,9 +28,17 @@ jobs:
           pip install -e .
           pip install odrive pyqtgraph pyqt5 pyqt6 pyinstaller
           
-      - name: Build odrivetool_UI application
-        run: pyinstaller --onefile --windowed odrivetool_UI.py
+      - name: Create PyInstaller spec file
+        run: |
+          pyi-makespec --onefile --windowed --hidden-import fibre odrivetool_UI.py
+          # Optional: Add additional commands to modify the spec file if necessary.
+        shell: pwsh
 
+      - name: Build odrivetool_UI application using spec file
+        run: |
+          pyinstaller odrivetool_UI.spec
+          # If the .spec file needs to be generated with specific options, include them here.
+          
       - name: Extract tag name
         id: get_tag_name
         run: echo "TAG_NAME=${GITHUB_REF##*/}" >> $GITHUB_ENV
@@ -57,5 +65,3 @@ jobs:
           asset_path: ./dist/odrivetool_UI.exe
           asset_name: odrivetool_UI.exe
           asset_content_type: application/octet-stream
-          
-
