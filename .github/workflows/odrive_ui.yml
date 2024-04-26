@@ -34,9 +34,14 @@ jobs:
         
         shell: pwsh
 
+      - name: Manually adjust PyInstaller spec file
+        run: |
+                  
+        shell: pwsh
+
       - name: Build odrivetool_UI application using spec file
         run: |
-          pyinstaller odrivetool_UI.spec
+          pyinstaller --noconfirm --clean odrivetool_UI.spec
                     
       - name: Extract tag name
         id: get_tag_name
