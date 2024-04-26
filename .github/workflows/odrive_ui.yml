@@ -1,13 +1,3 @@
- It looks like there is an issue with creating the release due to an invalid tag name. The error message suggests that the tag name starts with `refs/`, which is not allowed.
-
-To fix this issue, you can modify the `tag_name` property in the `actions/create-release@v1` action to remove the `refs/` prefix. You can update the line to:
-```yaml
-tag_name: ${{ github.ref.replace('refs/tags/', '') }}
-```
-This will remove the `refs/tags/` prefix from the tag name, and use only the version number as the tag name.
-
-Here's the updated workflow with this change:
-```yaml
 name: Odrive UI Deployment
 
 on:
@@ -65,4 +55,3 @@ jobs:
       with:
         host: ${{ secrets.HOST }}
         username: ${{ secrets.USERNAME }}
-```
