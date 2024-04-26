@@ -62,4 +62,4 @@ jobs:
         uses: appleboy/ssh-action@master
         with:
           host: ${{ secrets.HOST }}
-          username: ${{ secrets.USERNAME }}    帮我修改
+          username: ${{ secrets.USERNAME }}    
