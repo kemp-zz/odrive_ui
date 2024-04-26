@@ -3,9 +3,8 @@ name: Odrive UI Deployment
 on:
   push:
     branches: [ master ]
-    tags: 
+    tags:
       - 'v1.0.0'
-
 
 jobs:
   build-and-deploy:
@@ -13,32 +12,46 @@ jobs:
     steps:
 
       - uses: actions/checkout@v3
+
+
       - name: Set up Python
         uses: actions/setup-python@v3
         with:
           python-version: '3.9'
+
+
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
           pip install -e .
           pip install odrive pyqtgraph pyqt5 pyqt6 pyinstaller
-        shell: pwsh     
+        shell: pwsh
+      
   
       - name: Build odrivetool_UI application
         run: pyinstaller --onefile --windowed odrivetool_UI.py
         shell: pwsh
 
-      - name: Create Release        
+
+      - name: Extract tag name from ref
+        id: get_tag_name
+        run: echo "::set-output name=TAG_NAME::${GITHUB_REF#'refs/tags/'}"
+
+
+      - name: Create Release
+        
         uses: actions/create-release@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          tag_name: ${{ github.ref | split('refs/tags/') | last }}
-          release_name: Release ${{ github.ref | split('refs/tags/') | last }}
+          tag_name: ${{ steps.get_tag_name.outputs.TAG_NAME }}
+          release_name: Release ${{ steps.get_tag_name.outputs.TAG_NAME }}
           body: |
            Update notes for this release.
           draft: false
           prerelease: false
+
+
    
       - name: Upload Release Asset
         uses: actions/upload-release-asset@v1
@@ -50,8 +63,9 @@ jobs:
           asset_name: odrivetool_UI.exe
           asset_content_type: application/octet-stream
 
+
       - name: Deploy application
         uses: appleboy/ssh-action@master
         with:
           host: ${{ secrets.HOST }}
-          username: ${{ secrets.USERNAME }}    
+          username: ${{ secrets.USERNAME }}
