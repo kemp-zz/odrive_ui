@@ -1,3 +1,13 @@
+ It looks like there is an issue with creating the release due to an invalid tag name. The error message suggests that the tag name starts with `refs/`, which is not allowed.
+
+To fix this issue, you can modify the `tag_name` property in the `actions/create-release@v1` action to remove the `refs/` prefix. You can update the line to:
+```yaml
+tag_name: ${{ github.ref.replace('refs/tags/', '') }}
+```
+This will remove the `refs/tags/` prefix from the tag name, and use only the version number as the tag name.
+
+Here's the updated workflow with this change:
+```yaml
 name: Odrive UI Deployment
 
 on:
@@ -23,7 +33,8 @@ jobs:
           pip install -e .
           pip install odrive pyqtgraph pyqt5 pyinstaller
         shell: pwsh
-
+      
+  
       - name: Build odrivetool_UI application
         run: pyinstaller --onefile --windowed odrivetool_UI.py
         shell: pwsh
@@ -34,28 +45,24 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          tag_name: ${{ github.ref }}
+          tag_name: ${{ github.ref.replace('refs/tags/', '') }}
           release_name: Release ${{ github.ref }}
           draft: false
           prerelease: false
 
-      - name: Upload Release Asset
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./dist/odrivetool_UI.exe
-          asset_name: odrivetool_UI.exe
-          asset_content_type: application/octet-stream
+    - name: Upload Release Asset
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: ./dist/odrivetool_UI.exe
+        asset_name: odrivetool_UI.exe
+        asset_content_type: application/octet-stream
 
-      - name: Deploy application
-        uses: appleboy/ssh-action@master
-        with:
-          host: ${{ secrets.HOST }}
-          username: ${{ secrets.USERNAME }}
-          port: ${{ secrets.PORT }} # 如果你有自定义端口，请在这里指定
-          script: |
-            cd /path/to/deploy # 切换到要部署的目录
-            unzip -o /path/to/dist/odrivetool_UI.exe # 解压缩可执行文件
-            rm /path/to/dist/odrivetool_UI.exe # 从GitHub Actions运行器上删除已提取的文件
+    - name: Deploy application
+      uses: appleboy/ssh-action@master
+      with:
+        host: ${{ secrets.HOST }}
+        username: ${{ secrets.USERNAME }}
+```
