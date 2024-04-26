@@ -15,28 +15,23 @@ jobs:
       - uses: actions/checkout@v3
         with:
           fetch-depth: 0
-
       - name: Set up Python
         uses: actions/setup-python@v2
         with:
           python-version: ${{ env.PYTHON_VERSION }}
-
       - name: Install dependencies
         run: |
           pip install --upgrade pip
           pip install -e .
           pip install pyinstaller
-
       - name: Create PyInstaller spec file
         run: |
           pyi-makespec --onefile --windowed --hidden-import fibre odrivetool_UI.py
           pyinstaller --clean odrivetool_UI.spec
-
       - name: Extract tag name
         id: get_tag_name
         run: echo "TAG_NAME=${GITHUB_REF##*/}" >> $GITHUB_ENV
         shell: bash
-
       - name: Create Release
         id: create_release
         uses: actions/create-release@v1
@@ -48,7 +43,6 @@ jobs:
           body: Update notes for this release.
           draft: false
           prerelease: false
-
       - name: Upload Release Asset
         uses: actions/upload-release-asset@v1
         env:
